@@ -70,9 +70,8 @@ def filter_invalid_earthquakes(earthquakes, magnitude_list, felt_list, significa
             lat_list.append(float(earthquake['geometry']['coordinates'][0]))
             long_list.append(float(earthquake['geometry']['coordinates'][1]))
 
-        except Exception as e:
+        except ValueError as e:
             continue
-
     return quakes_list
 
 
@@ -130,6 +129,30 @@ class QuakeData:
             )
 
         print(self.quake_array)
+
+    def get_filtered_array(self):
+
+        filtered_array = self.quake_array
+        if self.location_filter is not None:
+            location_filter = np.where(calc_distance(self.quake_array[:, 4], self.quake_array[:, 5],
+                                                     self.location_filter[0], self.location_filter[1])
+                                       <= self.location_filter[2], True, False)
+            filtered_array = filtered_array[location_filter]
+
+        if self.property_filter is not None:
+            property_filter = np.where((self.quake_array[:, 2] >= self.property_filter[1]) and
+                                       (self.quake_array[:, 1] >= self.property_filter[0]) and
+                                       self.quake_array[:, 3] >= self.property_filter[2], True, False)
+
+            filtered_array = filtered_array[property_filter]
+
+        return filtered_array
+
+    def get_filtered_list(self):
+
+        filtered_list = self.get_filtered_array()[0]
+
+        return filtered_list[:, 0].tolist()
 
     def set_location_filter(self, latitude, longitude, distance):
         try:
