@@ -25,6 +25,7 @@ def calc_distance(lat1, lon1, lat2, lon2):
 
     distance_meters = _earth_radius * c
     distance_kms = distance_meters / 1000
+
     return distance_kms
 
 
@@ -55,7 +56,6 @@ def filter_invalid_earthquakes(earthquakes, magnitude_list, felt_list, significa
                     valid_earthquakes.append(earthquake)
 
     quakes_list = []
-    print(valid_earthquakes)
     for earthquake in valid_earthquakes:
         try:
             felt_list.append(int(earthquake['properties']['felt']))
@@ -128,21 +128,20 @@ class QuakeData:
                 long_list[i]
             )
 
-        print(self.quake_array)
-
     def get_filtered_array(self):
 
         filtered_array = self.quake_array
         if self.location_filter is not None:
-            location_filter = np.where(calc_distance(self.quake_array[:, 4], self.quake_array[:, 5],
-                                                     self.location_filter[0], self.location_filter[1])
-                                       <= self.location_filter[2], True, False)
+
+            distance_vectorize = np.vectorize(calc_distance)
+
+            location_filter = np.where(distance_vectorize(filtered_array['lat'],filtered_array['long'], self.location_filter[0], self.location_filter[1])<=self.location_filter[2] )
             filtered_array = filtered_array[location_filter]
 
         if self.property_filter is not None:
-            property_filter = np.where((self.quake_array[:, 2] >= self.property_filter[1]) and
-                                       (self.quake_array[:, 1] >= self.property_filter[0]) and
-                                       self.quake_array[:, 3] >= self.property_filter[2], True, False)
+            property_filter = np.where((filtered_array['felt'] >= self.property_filter[1]) &
+                                       (filtered_array['magnitude'] >= self.property_filter[0]) &
+                                       (filtered_array['significance'] >= self.property_filter[2]), True, False)
 
             filtered_array = filtered_array[property_filter]
 
@@ -150,9 +149,11 @@ class QuakeData:
 
     def get_filtered_list(self):
 
-        filtered_list = self.get_filtered_array()[0]
+        filtered_list = self.get_filtered_array()
 
-        return filtered_list[:, 0].tolist()
+        filtered_list = filtered_list['quake']
+
+        return filtered_list
 
     def set_location_filter(self, latitude, longitude, distance):
         try:
@@ -160,11 +161,17 @@ class QuakeData:
         except ValueError:
             raise ValueError("Invalid/Missing parameters")
 
-    def set_property_filter(self, magnitude, felt, significance):
-        try:
-            self.property_filter = (magnitude, felt, significance)
-        except ValueError:
+    def set_property_filter(self, magnitude=None, felt=None, significance=None):
+        if magnitude is None and felt is None and significance is None:
             raise ValueError("Invalid/Missing parameters")
+        else:
+            if magnitude is None:
+                magnitude = 0
+            if felt is None:
+                felt = 0
+            if significance is None:
+                significance = 0
+            self.property_filter = (magnitude, felt, significance)
 
     def clear_filter(self):
         self.location_filter = None
@@ -204,3 +211,16 @@ else:
     geojson_dictionary = {}
 
 qks = QuakeData(geojson_dictionary)
+
+qks.set_property_filter(4, 5, 10)
+qks.set_location_filter(100,100,5000)
+
+"""
+for e in qks.get_filtered_array():
+    print(e)
+
+for l in qks.get_filtered_list():
+    print(l)
+    print("-")
+"""
+
