@@ -4,11 +4,33 @@ import numpy as np
 from pathlib import Path
 
 
+def ensure_numeric(value):
+    """This function will evaluate the value:
+    if value is an int or float, it will be returned
+    if value is a string it will try to convert to float:
+        if it fails will raise a TypeError
+        if it succeeds it will return the float value
+    """
+    if isinstance(value, (int, float)):
+        return value
+    try:
+        return float(value)
+    except ValueError:
+        raise ValueError(f"{value} is not a numeric value")
+
+
 def calc_distance(lat1, lon1, lat2, lon2):
     """This function will calculate the distance between two coordinates
     the coordinates are given through latitude and longitude (degrees).
     The distance is calculated used the haversine formula
     The calculated distance will be in kilometers."""
+
+    # Ensure the coordinates are numeric
+
+    lat1 = ensure_numeric(lat1)
+    lon1 = ensure_numeric(lon1)
+    lat2 = ensure_numeric(lat2)
+    lon2 = ensure_numeric(lon2)
 
     _earth_radius = 6_371_000
 
@@ -132,10 +154,10 @@ class QuakeData:
 
         filtered_array = self.quake_array
         if self.location_filter is not None:
-
             distance_vectorize = np.vectorize(calc_distance)
-
-            location_filter = np.where(distance_vectorize(filtered_array['lat'],filtered_array['long'], self.location_filter[0], self.location_filter[1])<=self.location_filter[2] )
+            location_filter = np.where(
+                distance_vectorize(filtered_array['lat'], filtered_array['long'], self.location_filter[0],
+                                   self.location_filter[1]) <= self.location_filter[2])
             filtered_array = filtered_array[location_filter]
 
         if self.property_filter is not None:
@@ -199,28 +221,15 @@ class Quake:
         return calc_distance(self.lat, self.lon, latitude, longitude)
 
 
-# test cal_distance with values from https://www.omnicalculator.com/other/latitude-longitude-distance
-print(f"Testing calculating distance: {calc_distance(27.9881, 86.9250, 40.7484, -73.9857)}  == 12122")
-print(f"Testing calculating distance: {calc_distance(48.8566, 2.3522, 50.0647, 19.9450)}  == 1275")
 
-path = Path("./Data/earthquakes.geojson")
 
-if path.exists():
-    geojson_dictionary = json.loads(path.read_text())
-else:
-    geojson_dictionary = {}
 
+"""
 qks = QuakeData(geojson_dictionary)
 
 qks.set_property_filter(4, 5, 10)
-qks.set_location_filter(100,100,5000)
+qks.set_location_filter(100, 100, 5000)
+
+print(qks.get_filtered_array())
 
 """
-for e in qks.get_filtered_array():
-    print(e)
-
-for l in qks.get_filtered_list():
-    print(l)
-    print("-")
-"""
-
