@@ -66,17 +66,17 @@ def filter_invalid_earthquakes(earthquakes, magnitude_list, felt_list, significa
     valid_earthquakes = []
 
     for earthquake in earthquakes['features']:
-        if earthquake['geometry']['type'] == "Point" and earthquake['type'] == "Feature":
-            if coordinate_is_tuple(earthquake):
-                if ('mag' in earthquake['properties'] and
-                        'time' in earthquake['properties'] and
-                        'felt' in earthquake['properties'] and
-                        'sig' in earthquake['properties'] and
-                        'type' in earthquake['properties'] and
-                        'magType' in earthquake['properties'] and
-                        isinstance(earthquake['properties']['felt'], (int, float))):
-                    valid_earthquakes.append(earthquake)
-
+        if 'coordinates' in earthquake['geometry']:
+            if earthquake['geometry']['type'] == "Point" and earthquake['type'] == "Feature":
+                if coordinate_is_tuple(earthquake):
+                    if ('mag' in earthquake['properties'] and
+                            'time' in earthquake['properties'] and
+                            'felt' in earthquake['properties'] and
+                            'sig' in earthquake['properties'] and
+                            'type' in earthquake['properties'] and
+                            'magType' in earthquake['properties'] and
+                            isinstance(earthquake['properties']['felt'], (int, float))):
+                        valid_earthquakes.append(earthquake)
     quakes_list = []
     for earthquake in valid_earthquakes:
         try:
@@ -170,11 +170,8 @@ class QuakeData:
         return filtered_array
 
     def get_filtered_list(self):
-
         filtered_list = self.get_filtered_array()
-
         filtered_list = filtered_list['quake']
-
         return filtered_list
 
     def set_location_filter(self, latitude, longitude, distance):
@@ -219,17 +216,3 @@ class Quake:
 
     def get_distance_from(self, latitude, longitude):
         return calc_distance(self.lat, self.lon, latitude, longitude)
-
-
-
-
-
-"""
-qks = QuakeData(geojson_dictionary)
-
-qks.set_property_filter(4, 5, 10)
-qks.set_location_filter(100, 100, 5000)
-
-print(qks.get_filtered_array())
-
-"""
