@@ -8,7 +8,7 @@ def ensure_numeric(value):
     """
     This method will ensure a value is numeric
     :param value: a value
-    :return: value if its numeric.
+    :return: said value  if its numeric.
     """
     if isinstance(value, (int, float)):
         return value
@@ -196,6 +196,7 @@ class QuakeData:
 
         # if there is a location filter apply
         if self.location_filter is not None:
+
             # vectorize function so its usable by numpy
             distance_vectorize = np.vectorize(calc_distance)
 
@@ -203,7 +204,6 @@ class QuakeData:
             location_filter = np.where(
                 distance_vectorize(filtered_array['lat'], filtered_array['long'], self.location_filter[0],
                                    self.location_filter[1]) <= self.location_filter[2])
-
             # update the array with the filter
             filtered_array = filtered_array[location_filter]
 
@@ -259,48 +259,45 @@ class QuakeData:
         :param felt: number of reports
         :param significance: number of how significant was the earthquake
         """
-
-        # check if at least one parameter was correctly provided
-        if magnitude is None and felt is None and significance is None:
-            raise ValueError("Invalid/Missing parameters")
+        # parameters not provided are set to 0. also count the number of valid parameters
+        invalid_count = 0
+        if magnitude is None:
+            magnitude = 0
+            invalid_count += 1
         else:
-
-            # parameters not provided are set to 0. also count the number of valid parameters
-            invalid_count = 0
-            if magnitude is None:
+            try:
+                magnitude = float(magnitude)
+            except ValueError:
                 magnitude = 0
-            else:
-                try:
-                    magnitude = float(magnitude)
-                except ValueError:
-                    magnitude = 0
-                    invalid_count += 1
+                invalid_count += 1
 
-            if felt is None:
+        if felt is None:
+            felt = 0
+            invalid_count += 1
+        else:
+            try:
+                felt = float(felt)
+            except ValueError:
                 felt = 0
-            else:
-                try:
-                    felt = float(felt)
-                except ValueError:
-                    felt = 0
-                    invalid_count += 1
+                invalid_count += 1
 
-            if significance is None:
+        if significance is None:
+            significance = 0
+            invalid_count += 1
+        else:
+            try:
+                significance = float(significance)
+            except ValueError:
                 significance = 0
-            else:
-                try:
-                    significance = float(significance)
-                except ValueError:
-                    significance = 0
-                    invalid_count += 1
+                invalid_count += 1
 
-            # if all parameters are not valid then raise the exception
-            if invalid_count >= 3:
-                raise ValueError("Invalid/Missing parameters")
+        # if all parameters are not valid then raise the exception
+        if invalid_count >= 3:
+            raise ValueError("Invalid/Missing parameters")
 
-            # set the filter
-            else:
-                self.property_filter = (magnitude, felt, significance)
+        # set the filter
+        else:
+            self.property_filter = (magnitude, felt, significance)
 
     def clear_filter(self):
         """

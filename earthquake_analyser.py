@@ -91,6 +91,8 @@ def set_location_filter(quake_data):
         user_distance = float(user_distance)
 
         quake_data.set_location_filter(user_latitude, user_longitude, user_distance)
+
+        print("successfully set the location filter")
     except ValueError:
         print("Please enter a valid latitude, longitude and distance values")
 
@@ -125,16 +127,27 @@ def set_property_filter(quake_data):
 
     invalid_count = 0
 
-    # verify if input is valid
-    for user_input in (user_significance, user_felt, user_magnitude):
-        try:
-            user_input = float(user_input)
-        except ValueError:
-            user_input = None
-            invalid_count += 1
+    # check if the values are numeric
+    try:
+        user_significance = float(user_significance)
+    except ValueError:
+        user_significance = None
+        invalid_count += 1
+
+    try:
+        user_felt = float(user_felt)
+    except ValueError:
+        user_felt = None
+        invalid_count += 1
+
+    try:
+        user_magnitude = float(user_magnitude)
+    except ValueError:
+        user_magnitude = None
+        invalid_count += 1
 
     # if the user didnt provide at least one parameter send error
-    if invalid_count >= 3:
+    if invalid_count == 3:
         print("No valid significance/felt/magnitude values found \nUnable to set property filter")
 
     # if the user did provide at least one parameter set the filter
@@ -290,27 +303,28 @@ def main(argv):
         Please select an option (1-9)
            """)
 
-        option.strip().rstrip().lstrip()
-        if option == "1":
-            set_location_filter(quake_data)
-        elif option == "2":
-            set_property_filter(quake_data)
-        elif option == "3":
-            clear_filters(quake_data)
-        elif option == "4":
-            display_filtered_quakes(quake_data)
-        elif option == "5":
-            display_exceptional_quakes(quake_data)
-        elif option == "6":
-            display_magnitude_stats(quake_data)
-        elif option == "7":
-            display_quake_map(quake_data)
-        elif option == "8":
-            display_magnitude_chart(quake_data)
-        elif option == "9":
-            sys.exit()
-        else:
-            print("Invalid option, please select one of the options by choosing the number accordingly")
+        option.strip()
+        match option:
+            case "1":
+                set_location_filter(quake_data)
+            case "2":
+                set_property_filter(quake_data)
+            case "3":
+                clear_filters(quake_data)
+            case "4":
+                display_filtered_quakes(quake_data)
+            case "5":
+                display_exceptional_quakes(quake_data)
+            case "6":
+                display_magnitude_stats(quake_data)
+            case "7":
+                display_quake_map(quake_data)
+            case "8":
+                display_magnitude_chart(quake_data)
+            case "9":
+                sys.exit()
+            case _:
+                print("Invalid option, please select one of the options by choosing the number accordingly")
 
 
 if __name__ == "__main__":
