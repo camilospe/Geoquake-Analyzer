@@ -117,7 +117,7 @@ class TestQuake(TestCase):
 class TestQuakeData(TestCase):
 
     def test_create_quake_data_from_dictionary(self):
-        earthquakes_dictionary = read_earthquakes_dictionary("./Data/earthquakes.geojson")
+        earthquakes_dictionary = read_earthquakes_dictionary("./earthquakes.geojson")
         quake_data = earthquakes.QuakeData(earthquakes_dictionary)
         self.assertIsInstance(quake_data, earthquakes.QuakeData)
 
@@ -167,7 +167,7 @@ class TestQuakeData(TestCase):
         self.assertEqual(len(quake_data.quake_array.tolist()), 11)
 
     def test_unfiltered_array_is_equal_to_complete_array(self):
-        earthquakes_dictionary = read_earthquakes_dictionary("./Data/earthquakes.geojson")
+        earthquakes_dictionary = read_earthquakes_dictionary("./earthquakes.geojson")
         quake_data = earthquakes.QuakeData(earthquakes_dictionary)
 
         filtered_array = quake_data.get_filtered_array()
@@ -177,7 +177,7 @@ class TestQuakeData(TestCase):
             self.assertEqual(filtered_array[i], complete_array[i])
 
     def test_cleared_filter_array_is_equal_to_complete_array(self):
-        earthquakes_dictionary = read_earthquakes_dictionary("./Data/earthquakes.geojson")
+        earthquakes_dictionary = read_earthquakes_dictionary("./earthquakes.geojson")
         quake_data = earthquakes.QuakeData(earthquakes_dictionary)
 
         quake_data.set_location_filter(100, 100, 5000)
@@ -197,7 +197,7 @@ class TestQuakeData(TestCase):
         self.assertNotEqual(filtered_len, len(quake_data.get_filtered_array()))
 
     def test_partial_property_filter_is_valid(self):
-        earthquakes_dictionary = read_earthquakes_dictionary("./Data/earthquakes.geojson")
+        earthquakes_dictionary = read_earthquakes_dictionary("./earthquakes.geojson")
         quake_data = earthquakes.QuakeData(earthquakes_dictionary)
 
         try:
