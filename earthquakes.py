@@ -1,5 +1,7 @@
 import math
 import json
+import sys
+
 import numpy as np
 from pathlib import Path
 
@@ -81,25 +83,34 @@ def filter_invalid_earthquakes(earthquakes, magnitude_list, felt_list, significa
     valid_earthquakes = []
 
     # grab the earthquakes from the dictionary
-    for earthquake in earthquakes['features']:
+    try:
 
-        # valid earthquake must have the type, geometry -> type,
-        # mag, felt, sig, type, magType, and geometry -> coordinates fields
-        if 'coordinates' in earthquake['geometry']:
-            if earthquake['geometry']['type'] == "Point" and earthquake['type'] == "Feature":
+        for earthquake in earthquakes['features']:
 
-                # check if coordinates is a tuple of numbers
-                if coordinate_is_tuple(earthquake):
+            # valid earthquake must have the type, geometry -> type,
+            # mag, felt, sig, type, magType, and geometry -> coordinates fields
+            if 'coordinates' in earthquake['geometry']:
+                if earthquake['geometry']['type'] == "Point" and earthquake['type'] == "Feature":
 
-                    # check no missing fields
-                    if ('mag' in earthquake['properties'] and
-                            'time' in earthquake['properties'] and
-                            'felt' in earthquake['properties'] and
-                            'sig' in earthquake['properties'] and
-                            'type' in earthquake['properties'] and
-                            'magType' in earthquake['properties'] and
-                            isinstance(earthquake['properties']['felt'], (int, float))):
-                        valid_earthquakes.append(earthquake)
+                    # check if coordinates is a tuple of numbers
+                    if coordinate_is_tuple(earthquake):
+
+                        # check no missing fields
+                        if ('mag' in earthquake['properties'] and
+                                'time' in earthquake['properties'] and
+                                'felt' in earthquake['properties'] and
+                                'sig' in earthquake['properties'] and
+                                'type' in earthquake['properties'] and
+                                'magType' in earthquake['properties'] and
+                                isinstance(earthquake['properties']['felt'], (int, float))):
+                            valid_earthquakes.append(earthquake)
+
+    except Exception as e:
+        print("dictionary didnt match geojson format. for more information please visit "
+              "https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php ")
+        sys.exit()
+        #return e
+
     # empty list to populate with valid earthquakes
     quakes_list = []
 

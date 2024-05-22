@@ -15,10 +15,6 @@ def read_dictionary(path="./earthquakes.geojson"):
     :return: dictionary with the information from the file
     """
 
-    # check if the user provided a path different to the default one
-    if path != "./earthquakes.geojson":
-        print(f"Received file path to analyze: {path}")
-
     path = Path(path)
 
     # check if path directs to a file
@@ -30,9 +26,11 @@ def read_dictionary(path="./earthquakes.geojson"):
 
         except Exception as e:
             print("Could not read provided file")
-            raise e
+            sys.exit()
+
     else:
-        raise FileNotFoundError("File doesnt exist")
+        print("File doesnt exist")
+        sys.exit()
 
     # return dictionary
     return geojson_dictionary
@@ -42,7 +40,7 @@ def load_quake_data_from_dictionary(dictionary):
     """
     This function will receive a dictionary contained earthquakes in the geojson format
     Will create a QuakeData object with said dictionary
-    If there are no valid earthquakes in the QuakeData object will raise an exception
+    If there are no valid earthquakes in the QuakeData object will provide a message and exit
     If there are at list one valid earthquake it will return the QuakeData
     :param dictionary: Dictionary of earthquakes in geojson format
     :return: QuakeData object
@@ -54,7 +52,8 @@ def load_quake_data_from_dictionary(dictionary):
     # Check that at least one valid earthquake was found
     number_of_valid_earthquakes = len(quake_data.get_filtered_list())
     if number_of_valid_earthquakes == 0:
-        raise ValueError("No earthquakes found in the provided dictionary")
+        print("No earthquakes found in the provided dictionary")
+        sys.exit()
     else:
         print(f"Dictionary contained {number_of_valid_earthquakes} valid earthquakes")
     return quake_data
@@ -234,7 +233,7 @@ def display_magnitude_stats(quake_data):
 def display_quake_map(quake_data):
     """
     This method will create a scatter map. Where the X is lat, Y is lon
-    and the size of the marker represents the magnitude of the earthquake(multiplied by 15 so its visible)
+    and the size of the marker represents the magnitude of the earthquake(multiplied by 25 so its visible)
     :param quake_data: QuakeData object
     """
     # force new window
@@ -244,7 +243,7 @@ def display_quake_map(quake_data):
     filtered_array = quake_data.get_filtered_array()
 
     # plot the scatter map
-    plt.scatter(filtered_array['lat'], filtered_array['long'], s=filtered_array['magnitude'] * 15,
+    plt.scatter(filtered_array['lat'], filtered_array['long'], s=filtered_array['magnitude'] * 25,
                 edgecolors='black', marker='o',
                 label='Earthquake Magnitude')
 
@@ -252,6 +251,7 @@ def display_quake_map(quake_data):
     plt.ylabel('Longitude (degrees)')
     plt.title('Earthquakes Magnitude')
 
+    # dont need to close the scatter map to continue using the script
     plt.show(block=False)
 
 
@@ -282,7 +282,7 @@ def display_magnitude_chart(quake_data):
 def main(argv):
     # Check if a path was provided as a command line argument
     if len(argv) > 0:
-        print(f"Received file path to analyze: {argv[0]}")
+        print(f"\nReceived file path to analyze: {argv[0]}")
         geojson_dictionary = read_dictionary(argv[0])
     else:
         geojson_dictionary = read_dictionary()
@@ -304,27 +304,26 @@ def main(argv):
            """)
 
         option.strip()
-        match option:
-            case "1":
-                set_location_filter(quake_data)
-            case "2":
-                set_property_filter(quake_data)
-            case "3":
-                clear_filters(quake_data)
-            case "4":
-                display_filtered_quakes(quake_data)
-            case "5":
-                display_exceptional_quakes(quake_data)
-            case "6":
-                display_magnitude_stats(quake_data)
-            case "7":
-                display_quake_map(quake_data)
-            case "8":
-                display_magnitude_chart(quake_data)
-            case "9":
-                sys.exit()
-            case _:
-                print("Invalid option, please select one of the options by choosing the number accordingly")
+        if option == "1":
+            set_location_filter(quake_data)
+        elif option == "2":
+            set_property_filter(quake_data)
+        elif option == "3":
+            clear_filters(quake_data)
+        elif option == "4":
+            display_filtered_quakes(quake_data)
+        elif option == "5":
+            display_exceptional_quakes(quake_data)
+        elif option == "6":
+            display_magnitude_stats(quake_data)
+        elif option == "7":
+            display_quake_map(quake_data)
+        elif option == "8":
+            display_magnitude_chart(quake_data)
+        elif option == "9":
+            sys.exit()
+        else:
+            print("Invalid option, please select one of the options by choosing the number accordingly")
 
 
 if __name__ == "__main__":
